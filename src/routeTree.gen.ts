@@ -9,38 +9,214 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as ExamSelectRouteImport } from './routes/exam-select'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
+import { Route as AuthenticatedEncourageRouteImport } from './routes/_authenticated/encourage'
+import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated/create'
+import { Route as AuthenticatedCommunitiesRouteImport } from './routes/_authenticated/communities'
+import { Route as AuthenticatedCheckInRouteImport } from './routes/_authenticated/check-in'
+import { Route as AuthenticatedCommunitiesIndexRouteImport } from './routes/_authenticated/communities.index'
+import { Route as AuthenticatedCommunitiesSlugRouteImport } from './routes/_authenticated/communities.$slug'
 
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExamSelectRoute = ExamSelectRouteImport.update({
+  id: '/exam-select',
+  path: '/exam-select',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedEncourageRoute = AuthenticatedEncourageRouteImport.update({
+  id: '/encourage',
+  path: '/encourage',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCreateRoute = AuthenticatedCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCommunitiesRoute =
+  AuthenticatedCommunitiesRouteImport.update({
+    id: '/communities',
+    path: '/communities',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedCheckInRoute = AuthenticatedCheckInRouteImport.update({
+  id: '/check-in',
+  path: '/check-in',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCommunitiesIndexRoute =
+  AuthenticatedCommunitiesIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedCommunitiesRoute,
+  } as any)
+const AuthenticatedCommunitiesSlugRoute =
+  AuthenticatedCommunitiesSlugRouteImport.update({
+    id: '/$slug',
+    path: '/$slug',
+    getParentRoute: () => AuthenticatedCommunitiesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/exam-select': typeof ExamSelectRoute
+  '/onboarding': typeof OnboardingRoute
+  '/check-in': typeof AuthenticatedCheckInRoute
+  '/communities': typeof AuthenticatedCommunitiesRouteWithChildren
+  '/create': typeof AuthenticatedCreateRoute
+  '/encourage': typeof AuthenticatedEncourageRoute
+  '/home': typeof AuthenticatedHomeRoute
+  '/profile': typeof AuthenticatedProfileRoute
+  '/communities/$slug': typeof AuthenticatedCommunitiesSlugRoute
+  '/communities/': typeof AuthenticatedCommunitiesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/exam-select': typeof ExamSelectRoute
+  '/onboarding': typeof OnboardingRoute
+  '/check-in': typeof AuthenticatedCheckInRoute
+  '/create': typeof AuthenticatedCreateRoute
+  '/encourage': typeof AuthenticatedEncourageRoute
+  '/home': typeof AuthenticatedHomeRoute
+  '/profile': typeof AuthenticatedProfileRoute
+  '/communities/$slug': typeof AuthenticatedCommunitiesSlugRoute
+  '/communities': typeof AuthenticatedCommunitiesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/exam-select': typeof ExamSelectRoute
+  '/onboarding': typeof OnboardingRoute
+  '/_authenticated/check-in': typeof AuthenticatedCheckInRoute
+  '/_authenticated/communities': typeof AuthenticatedCommunitiesRouteWithChildren
+  '/_authenticated/create': typeof AuthenticatedCreateRoute
+  '/_authenticated/encourage': typeof AuthenticatedEncourageRoute
+  '/_authenticated/home': typeof AuthenticatedHomeRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/communities/$slug': typeof AuthenticatedCommunitiesSlugRoute
+  '/_authenticated/communities/': typeof AuthenticatedCommunitiesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/exam-select'
+    | '/onboarding'
+    | '/check-in'
+    | '/communities'
+    | '/create'
+    | '/encourage'
+    | '/home'
+    | '/profile'
+    | '/communities/$slug'
+    | '/communities/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/exam-select'
+    | '/onboarding'
+    | '/check-in'
+    | '/create'
+    | '/encourage'
+    | '/home'
+    | '/profile'
+    | '/communities/$slug'
+    | '/communities'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/exam-select'
+    | '/onboarding'
+    | '/_authenticated/check-in'
+    | '/_authenticated/communities'
+    | '/_authenticated/create'
+    | '/_authenticated/encourage'
+    | '/_authenticated/home'
+    | '/_authenticated/profile'
+    | '/_authenticated/communities/$slug'
+    | '/_authenticated/communities/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  ExamSelectRoute: typeof ExamSelectRoute
+  OnboardingRoute: typeof OnboardingRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/exam-select': {
+      id: '/exam-select'
+      path: '/exam-select'
+      fullPath: '/exam-select'
+      preLoaderRoute: typeof ExamSelectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +224,109 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/home': {
+      id: '/_authenticated/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof AuthenticatedHomeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/encourage': {
+      id: '/_authenticated/encourage'
+      path: '/encourage'
+      fullPath: '/encourage'
+      preLoaderRoute: typeof AuthenticatedEncourageRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/create': {
+      id: '/_authenticated/create'
+      path: '/create'
+      fullPath: '/create'
+      preLoaderRoute: typeof AuthenticatedCreateRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/communities': {
+      id: '/_authenticated/communities'
+      path: '/communities'
+      fullPath: '/communities'
+      preLoaderRoute: typeof AuthenticatedCommunitiesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/check-in': {
+      id: '/_authenticated/check-in'
+      path: '/check-in'
+      fullPath: '/check-in'
+      preLoaderRoute: typeof AuthenticatedCheckInRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/communities/': {
+      id: '/_authenticated/communities/'
+      path: '/'
+      fullPath: '/communities/'
+      preLoaderRoute: typeof AuthenticatedCommunitiesIndexRouteImport
+      parentRoute: typeof AuthenticatedCommunitiesRoute
+    }
+    '/_authenticated/communities/$slug': {
+      id: '/_authenticated/communities/$slug'
+      path: '/$slug'
+      fullPath: '/communities/$slug'
+      preLoaderRoute: typeof AuthenticatedCommunitiesSlugRouteImport
+      parentRoute: typeof AuthenticatedCommunitiesRoute
+    }
   }
 }
 
+interface AuthenticatedCommunitiesRouteChildren {
+  AuthenticatedCommunitiesSlugRoute: typeof AuthenticatedCommunitiesSlugRoute
+  AuthenticatedCommunitiesIndexRoute: typeof AuthenticatedCommunitiesIndexRoute
+}
+
+const AuthenticatedCommunitiesRouteChildren: AuthenticatedCommunitiesRouteChildren =
+  {
+    AuthenticatedCommunitiesSlugRoute: AuthenticatedCommunitiesSlugRoute,
+    AuthenticatedCommunitiesIndexRoute: AuthenticatedCommunitiesIndexRoute,
+  }
+
+const AuthenticatedCommunitiesRouteWithChildren =
+  AuthenticatedCommunitiesRoute._addFileChildren(
+    AuthenticatedCommunitiesRouteChildren,
+  )
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCheckInRoute: typeof AuthenticatedCheckInRoute
+  AuthenticatedCommunitiesRoute: typeof AuthenticatedCommunitiesRouteWithChildren
+  AuthenticatedCreateRoute: typeof AuthenticatedCreateRoute
+  AuthenticatedEncourageRoute: typeof AuthenticatedEncourageRoute
+  AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCheckInRoute: AuthenticatedCheckInRoute,
+  AuthenticatedCommunitiesRoute: AuthenticatedCommunitiesRouteWithChildren,
+  AuthenticatedCreateRoute: AuthenticatedCreateRoute,
+  AuthenticatedEncourageRoute: AuthenticatedEncourageRoute,
+  AuthenticatedHomeRoute: AuthenticatedHomeRoute,
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
+  ExamSelectRoute: ExamSelectRoute,
+  OnboardingRoute: OnboardingRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
