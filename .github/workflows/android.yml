@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  # SPA build target — embedded inside the APK (no remote URL, no browser feel).
+  # The Android shell loads the published Lovable URL directly (see capacitor.config.ts).
   VITE_REMOTE_API_BASE: https://grow-together-haven.lovable.app
   VITE_SUPABASE_URL: https://nmxcuxhckhcajcvdoeeu.supabase.co
   VITE_SUPABASE_PROJECT_ID: nmxcuxhckhcajcvdoeeu
@@ -40,7 +40,7 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Build SPA bundle (+ Capacitor index.html)
+      - name: Write Capacitor fallback shell
         run: bun run cap:build
 
       - name: Add Android platform
