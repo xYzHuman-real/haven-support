@@ -10,7 +10,7 @@ export const getProfile = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const { data, error } = await supabase
       .from("profiles")
-      .select("id, display_name, exams, onboarded")
+      .select("id, display_name, exams, subcategories, journey, onboarded")
       .eq("id", userId)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -23,7 +23,9 @@ export const updateProfile = createServerFn({ method: "POST" })
     z
       .object({
         display_name: z.string().trim().min(1).max(40).optional(),
-        exams: z.array(z.string()).max(6).optional(),
+        exams: z.array(z.string()).max(20).optional(),
+        subcategories: z.array(z.string()).max(20).optional(),
+        journey: z.string().max(40).nullable().optional(),
         onboarded: z.boolean().optional(),
       })
       .parse(d),
@@ -213,7 +215,7 @@ export const getProfileStats = createServerFn({ method: "GET" })
         .eq("user_id", userId)
         .order("day", { ascending: false })
         .limit(120),
-      supabase.from("profiles").select("display_name, exams").eq("id", userId).maybeSingle(),
+      supabase.from("profiles").select("display_name, exams, subcategories, journey").eq("id", userId).maybeSingle(),
     ]);
 
     let streak = 0;
@@ -235,6 +237,8 @@ export const getProfileStats = createServerFn({ method: "GET" })
       streak,
       display_name: profileRes.data?.display_name ?? "Student",
       exams: (profileRes.data?.exams as string[]) ?? [],
+      subcategories: ((profileRes.data as any)?.subcategories as string[]) ?? [],
+      journey: ((profileRes.data as any)?.journey as string | null) ?? null,
     };
   });
 

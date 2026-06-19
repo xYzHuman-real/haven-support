@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { ENCOURAGEMENTS, type EncouragementKind, initialsOf } from "@/lib/haven-constants";
 import { sendEncouragement } from "@/lib/feed.functions";
+import { checkAndAwardBadges } from "@/lib/v2.functions";
 import { cn } from "@/lib/utils";
 
 export type FeedPost = {
@@ -42,9 +43,19 @@ export function PostCard({ post }: { post: FeedPost }) {
       setLocal((prev) => prev.filter((k) => k !== kind));
       toast.error("Couldn't send. Try again.");
     },
-    onSettled: () => {
+    onSettled: async () => {
       setPending(null);
       qc.invalidateQueries({ queryKey: ["encouragements-today"] });
+      qc.invalidateQueries({ queryKey: ["enc-stats"] });
+      try {
+        const res = await checkAndAwardBadges();
+        if (res.awarded.length > 0) {
+          qc.invalidateQueries({ queryKey: ["my-badges"] });
+          toast.success("New badge unlocked! 🌟");
+        }
+      } catch {
+        /* ignore */
+      }
     },
   });
 

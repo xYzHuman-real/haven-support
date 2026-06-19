@@ -10,18 +10,39 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-const KEY = "haven_pending_exams";
+const LEGACY_EXAMS_KEY = "haven_pending_exams";
+const PENDING_V2_KEY = "haven_pending_v2";
 
 async function applyPendingExams() {
   try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return;
-    const exams = JSON.parse(raw) as string[];
     const { data } = await supabase.auth.getSession();
-    if (data.session?.user) {
-      await supabase.from("profiles").update({ exams, onboarded: true }).eq("id", data.session.user.id);
-      localStorage.removeItem(KEY);
+    const user = data.session?.user;
+    if (!user) return;
+    const update: {
+      onboarded: boolean;
+      journey?: string;
+      subcategories?: string[];
+      exams?: string[];
+    } = { onboarded: true };
+    const v2raw = localStorage.getItem(PENDING_V2_KEY);
+    if (v2raw) {
+      const v2 = JSON.parse(v2raw) as { journey?: string | null; subcategories?: string[] };
+      if (v2.journey) update.journey = v2.journey;
+      if (Array.isArray(v2.subcategories)) {
+        update.subcategories = v2.subcategories;
+        update.exams = v2.subcategories; // back-compat
+      }
+    } else {
+      const legacy = localStorage.getItem(LEGACY_EXAMS_KEY);
+      if (legacy) {
+        const exams = JSON.parse(legacy) as string[];
+        update.exams = exams;
+        update.subcategories = exams;
+      }
     }
+    await supabase.from("profiles").update(update).eq("id", user.id);
+    localStorage.removeItem(PENDING_V2_KEY);
+    localStorage.removeItem(LEGACY_EXAMS_KEY);
   } catch {
     /* ignore */
   }
