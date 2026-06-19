@@ -6,6 +6,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { MobileFrame } from "@/components/MobileFrame";
 
 export const Route = createFileRoute("/auth")({
+  ssr: false,
   component: AuthPage,
 });
 
