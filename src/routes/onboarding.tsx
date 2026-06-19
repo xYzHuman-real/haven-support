@@ -3,7 +3,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { MobileFrame } from "@/components/MobileFrame";
 
 export const Route = createFileRoute("/onboarding")({
-  ssr: false,
   component: Onboarding,
 });
 
