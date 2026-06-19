@@ -49,7 +49,8 @@ function AuthPage() {
         applyPendingExams().then(() => navigate({ to: "/check-in", replace: true }));
       }
     });
-  }, [navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
