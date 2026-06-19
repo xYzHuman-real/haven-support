@@ -1,6 +1,11 @@
 import { QueryClient } from "@tanstack/react-query";
 import { createRouter, createHashHistory } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
+import { installNativeFetchBridge } from "./lib/native-fetch-bridge";
+
+if (typeof window !== "undefined") {
+  installNativeFetchBridge();
+}
 
 function isNativeOrFile() {
   if (typeof window === "undefined") return false;
