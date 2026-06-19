@@ -3,7 +3,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'com.haven.app',
   appName: 'Haven',
-  webDir: 'dist',
+  webDir: 'dist/client',
   server: {
     androidScheme: 'https',
   },

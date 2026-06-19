@@ -35,7 +35,8 @@ const html = `<!DOCTYPE html>
 </html>
 `;
 
-writeFileSync(join(distDir, "index.html"), html);
-console.log("✅ Capacitor index.html generated at dist/index.html");
+writeFileSync(join(clientDir, "index.html"), html);
+console.log("✅ Capacitor index.html generated at dist/client/index.html");
 console.log("   JS:", jsEntry);
 console.log("   CSS:", cssEntry);
+
