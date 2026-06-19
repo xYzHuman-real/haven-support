@@ -30,8 +30,14 @@ function CheckIn() {
     try {
       await save({ data: { mood: picked } });
       navigate({ to: "/home" });
-    } catch {
-      toast.error("Couldn't save your mood.");
+    } catch (e: any) {
+      const msg = e?.message ?? String(e);
+      if (/unauthor|401/i.test(msg)) {
+        toast.error("Session expired — please sign in again");
+        navigate({ to: "/auth", replace: true });
+      } else {
+        toast.error(msg || "Couldn't save your mood.");
+      }
       setBusy(false);
     }
   };

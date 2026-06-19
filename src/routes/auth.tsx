@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
+import { signInWithGoogle, waitForSession } from "@/lib/native-auth";
 import { MobileFrame } from "@/components/MobileFrame";
 
 export const Route = createFileRoute("/auth")({
@@ -61,6 +61,7 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       }
+      await waitForSession();
       await applyPendingExams();
       navigate({ to: "/check-in" });
     } catch (e: any) {
@@ -72,17 +73,17 @@ function AuthPage() {
 
   const google = async () => {
     setBusy(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/auth",
-    });
-    if (result.error) {
-      toast.error("Google sign-in failed");
+    const result = await signInWithGoogle(window.location.origin + "/auth");
+    if (!result.ok) {
+      toast.error(result.error);
       setBusy(false);
       return;
     }
     if (result.redirected) return;
+    await waitForSession();
     await applyPendingExams();
     navigate({ to: "/check-in" });
+    setBusy(false);
   };
 
   return (

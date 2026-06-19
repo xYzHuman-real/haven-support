@@ -6,12 +6,14 @@ on:
   workflow_dispatch:
 
 env:
-  # Live published Haven URL — the Android shell loads this URL in its WebView.
-  CAP_SERVER_URL: https://grow-together-haven.lovable.app
+  # SPA build target — embedded inside the APK (no remote URL, no browser feel).
   VITE_REMOTE_API_BASE: https://grow-together-haven.lovable.app
   VITE_SUPABASE_URL: https://nmxcuxhckhcajcvdoeeu.supabase.co
   VITE_SUPABASE_PROJECT_ID: nmxcuxhckhcajcvdoeeu
   VITE_SUPABASE_PUBLISHABLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5teGN1eGhja2hjYWpjdmRvZWV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3OTQ3MDIsImV4cCI6MjA5NzM3MDcwMn0.46SdkiHup0An7Lh9x_0M4a7n2Al_DG4ChTM5pxcQyJc
+  # Native Google sign-in — set GOOGLE_WEB_CLIENT_ID in repo Settings → Secrets.
+  GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
+  VITE_GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
 
 jobs:
   build:
@@ -41,7 +43,7 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Build web bundle (+ Capacitor index.html)
+      - name: Build SPA bundle (+ Capacitor index.html)
         run: bun run cap:build
 
       - name: Add Android platform
@@ -56,6 +58,9 @@ jobs:
       - name: Build debug APK
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Print debug keystore SHA-1 (register in Google Cloud Console)
+        run: keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android | grep SHA1 || true
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4

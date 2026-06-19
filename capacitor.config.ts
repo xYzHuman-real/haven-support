@@ -1,9 +1,11 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
-// Native shell loads the live published web app (which is SSR-rendered).
-// Override with CAP_SERVER_URL at build time if you ever change the URL.
-const DEFAULT_SERVER_URL = 'https://grow-together-haven.lovable.app';
-const serverUrl = (process.env.CAP_SERVER_URL?.trim() || DEFAULT_SERVER_URL);
+// Native shell ships the SPA bundle from dist/client.
+// (Data calls still hit the live Lovable Cloud backend via the native fetch bridge.)
+const GOOGLE_WEB_CLIENT_ID =
+  process.env.GOOGLE_WEB_CLIENT_ID ||
+  process.env.VITE_GOOGLE_WEB_CLIENT_ID ||
+  '';
 
 const config: CapacitorConfig = {
   appId: 'com.haven.app',
@@ -11,20 +13,29 @@ const config: CapacitorConfig = {
   webDir: 'dist/client',
   server: {
     androidScheme: 'https',
-    ...(serverUrl ? { url: serverUrl, cleartext: false } : {}),
   },
   android: {
     allowMixedContent: false,
   },
   plugins: {
     SplashScreen: {
-      launchShowDuration: 1500,
+      launchShowDuration: 1200,
       backgroundColor: '#F5F1E8',
       androidScaleType: 'CENTER_CROP',
       showSpinner: false,
       splashFullScreen: true,
       splashImmersive: true,
       launchAutoHide: true,
+    },
+    StatusBar: {
+      style: 'DARK',
+      backgroundColor: '#F5F1E8',
+      overlaysWebView: false,
+    },
+    GoogleAuth: {
+      scopes: ['profile', 'email'],
+      serverClientId: GOOGLE_WEB_CLIENT_ID,
+      forceCodeForRefreshToken: true,
     },
   },
 };
