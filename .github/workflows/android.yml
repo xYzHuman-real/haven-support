@@ -5,6 +5,14 @@ on:
     branches: [main]
   workflow_dispatch:
 
+env:
+  # Live published Haven URL — the Android shell loads this URL in its WebView.
+  CAP_SERVER_URL: https://grow-together-haven.lovable.app
+  VITE_REMOTE_API_BASE: https://grow-together-haven.lovable.app
+  VITE_SUPABASE_URL: https://nmxcuxhckhcajcvdoeeu.supabase.co
+  VITE_SUPABASE_PROJECT_ID: nmxcuxhckhcajcvdoeeu
+  VITE_SUPABASE_PUBLISHABLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5teGN1eGhja2hjYWpjdmRvZWV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3OTQ3MDIsImV4cCI6MjA5NzM3MDcwMn0.46SdkiHup0An7Lh9x_0M4a7n2Al_DG4ChTM5pxcQyJc
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -14,7 +22,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Java (JDK 17)
+      - name: Setup Java (JDK 21)
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -35,21 +43,12 @@ jobs:
 
       - name: Build web bundle (+ Capacitor index.html)
         run: bun run cap:build
-        env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
-          VITE_REMOTE_API_BASE: ${{ secrets.VITE_REMOTE_API_BASE }}
 
       - name: Add Android platform
         run: npx --yes cap add android
-        env:
-          CAP_SERVER_URL: ${{ secrets.CAP_SERVER_URL }}
 
       - name: Sync Capacitor → Android
         run: npx --yes cap sync android
-        env:
-          CAP_SERVER_URL: ${{ secrets.CAP_SERVER_URL }}
 
       - name: Make gradlew executable
         run: chmod +x android/gradlew
