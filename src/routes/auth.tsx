@@ -27,6 +27,11 @@ async function applyPendingExams() {
   }
 }
 
+function isNativeApp() {
+  if (typeof window === "undefined") return false;
+  return (window as any).Capacitor?.isNativePlatform?.() === true;
+}
+
 function AuthPage() {
   const [mode, setMode] = useState<"signin" | "signup">("signup");
   const [email, setEmail] = useState("");
@@ -34,6 +39,7 @@ function AuthPage() {
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
+  const hideGoogle = isNativeApp();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -99,19 +105,23 @@ function AuthPage() {
           </p>
         </div>
 
-        <button
-          onClick={google}
-          disabled={busy}
-          className="w-full py-3 rounded-xl bg-white border border-sage-200 text-sm font-medium text-sage-900 mb-3 disabled:opacity-50 flex items-center justify-center gap-2"
-        >
-          Continue with Google
-        </button>
+        {!hideGoogle && (
+          <>
+            <button
+              onClick={google}
+              disabled={busy}
+              className="w-full py-3 rounded-xl bg-white border border-sage-200 text-sm font-medium text-sage-900 mb-3 disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              Continue with Google
+            </button>
 
-        <div className="flex items-center gap-3 my-4">
-          <div className="flex-1 h-px bg-sage-100" />
-          <span className="text-[11px] text-sage-600/50 uppercase tracking-wider">or email</span>
-          <div className="flex-1 h-px bg-sage-100" />
-        </div>
+            <div className="flex items-center gap-3 my-4">
+              <div className="flex-1 h-px bg-sage-100" />
+              <span className="text-[11px] text-sage-600/50 uppercase tracking-wider">or email</span>
+              <div className="flex-1 h-px bg-sage-100" />
+            </div>
+          </>
+        )}
 
         <form onSubmit={submit} className="space-y-3">
           {mode === "signup" && (
