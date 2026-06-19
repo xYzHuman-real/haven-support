@@ -43,9 +43,13 @@ jobs:
 
       - name: Add Android platform
         run: npx --yes cap add android
+        env:
+          CAP_SERVER_URL: ${{ secrets.CAP_SERVER_URL }}
 
       - name: Sync Capacitor → Android
         run: npx --yes cap sync android
+        env:
+          CAP_SERVER_URL: ${{ secrets.CAP_SERVER_URL }}
 
       - name: Make gradlew executable
         run: chmod +x android/gradlew
