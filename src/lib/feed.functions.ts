@@ -101,33 +101,35 @@ export const getFeed = createServerFn({ method: "GET" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    let q = supabase
-      .from("posts")
-      .select("id, win, struggle, goal, is_anonymous, community, created_at, author_id")
-      .order("created_at", { ascending: false })
-      .limit(40);
-    if (data.community) q = q.eq("community", data.community);
-    const { data: posts, error } = await q;
+    const { data: posts, error } = await (supabase as any).rpc("get_posts_feed", {
+      _community: data.community ?? null,
+    });
     if (error) throw new Error(error.message);
     if (!posts || posts.length === 0) return [];
-    const authorIds = Array.from(new Set(posts.map((p) => p.author_id)));
-    const postIds = posts.map((p) => p.id);
-    const [{ data: profs }, { data: encs }] = await Promise.all([
-      supabase.from("profiles").select("id, display_name").in("id", authorIds),
+    const authorIds = Array.from(
+      new Set(posts.map((p: any) => p.author_id).filter(Boolean)),
+    ) as string[];
+    const postIds = posts.map((p: any) => p.id);
+    const [profsRes, encsRes] = await Promise.all([
+      authorIds.length
+        ? supabase.from("profiles").select("id, display_name").in("id", authorIds)
+        : Promise.resolve({ data: [] as any[] }),
       supabase
         .from("encouragements")
         .select("post_id, kind")
         .in("post_id", postIds)
         .eq("giver_id", userId),
     ]);
-    const nameMap = new Map((profs ?? []).map((p: any) => [p.id, p.display_name]));
+    const profs = (profsRes as any).data ?? [];
+    const encs = (encsRes as any).data ?? [];
+    const nameMap = new Map(profs.map((p: any) => [p.id, p.display_name]));
     const mineMap = new Map<string, string[]>();
-    (encs ?? []).forEach((e: any) => {
+    encs.forEach((e: any) => {
       const list = mineMap.get(e.post_id) ?? [];
       list.push(e.kind as string);
       mineMap.set(e.post_id, list);
     });
-    return posts.map((p) => ({
+    return posts.map((p: any) => ({
       id: p.id,
       win: p.win,
       struggle: p.struggle,
@@ -135,7 +137,9 @@ export const getFeed = createServerFn({ method: "GET" })
       is_anonymous: p.is_anonymous,
       community: p.community,
       created_at: p.created_at,
-      author_name: nameMap.get(p.author_id) ?? "Student",
+      author_name: p.is_anonymous
+        ? "Anonymous"
+        : (nameMap.get(p.author_id) ?? "Student"),
       my_kinds: (mineMap.get(p.id) ?? []) as Array<
         "understand" | "keep_going" | "not_alone" | "proud"
       >,
