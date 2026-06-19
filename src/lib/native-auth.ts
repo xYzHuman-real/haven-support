@@ -1,6 +1,9 @@
 // Platform-aware Google sign-in.
-// On native (Capacitor): uses the native Google account picker, then exchanges
-// the returned idToken with Supabase for a session — no browser redirect.
+// On native (Capacitor + Android): uses Firebase Authentication's native Google
+// sign-in (Credential Manager / Google Identity Services SDK) to get a Google
+// ID token without opening a browser, then exchanges it with Supabase for a
+// session. Firebase is only used as the token broker — Supabase remains the
+// auth/session source of truth.
 // On web: falls back to the Lovable-managed OAuth redirect flow.
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -17,21 +20,19 @@ export type GoogleSignInResult =
 export async function signInWithGoogle(redirectUri: string): Promise<GoogleSignInResult> {
   if (isNative()) {
     try {
-      const { GoogleAuth } = await import("@codetrix-studio/capacitor-google-auth");
-      // Initialize is required on web platforms; on Android it's a no-op but safe.
-      try {
-        await GoogleAuth.initialize();
-      } catch {
-        /* ignore */
-      }
-      const user = await GoogleAuth.signIn();
-      const idToken = (user as any)?.authentication?.idToken;
+      const { FirebaseAuthentication } = await import(
+        "@capacitor-firebase/authentication"
+      );
+      const result = await FirebaseAuthentication.signInWithGoogle();
+      const idToken = result?.credential?.idToken;
       if (!idToken) return { ok: false, error: "Google didn't return an ID token" };
       const { error } = await supabase.auth.signInWithIdToken({
         provider: "google",
         token: idToken,
       });
       if (error) return { ok: false, error: error.message };
+      // Sign out of Firebase — we only used it to broker the Google token.
+      try { await FirebaseAuthentication.signOut(); } catch { /* ignore */ }
       return { ok: true, redirected: false };
     } catch (e: any) {
       return { ok: false, error: e?.message ?? "Google sign-in failed" };

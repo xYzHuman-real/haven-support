@@ -11,9 +11,6 @@ env:
   VITE_SUPABASE_URL: https://nmxcuxhckhcajcvdoeeu.supabase.co
   VITE_SUPABASE_PROJECT_ID: nmxcuxhckhcajcvdoeeu
   VITE_SUPABASE_PUBLISHABLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5teGN1eGhja2hjYWpjdmRvZWV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3OTQ3MDIsImV4cCI6MjA5NzM3MDcwMn0.46SdkiHup0An7Lh9x_0M4a7n2Al_DG4ChTM5pxcQyJc
-  # Native Google sign-in — set GOOGLE_WEB_CLIENT_ID in repo Settings → Secrets.
-  GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
-  VITE_GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
 
 jobs:
   build:
@@ -49,6 +46,38 @@ jobs:
       - name: Add Android platform
         run: npx --yes cap add android
 
+      - name: Write google-services.json from secret
+        env:
+          GOOGLE_SERVICES_JSON_B64: ${{ secrets.GOOGLE_SERVICES_JSON_B64 }}
+        run: |
+          if [ -z "$GOOGLE_SERVICES_JSON_B64" ]; then
+            echo "ERROR: GOOGLE_SERVICES_JSON_B64 secret is not set."
+            echo "Get it from Firebase Console → Project Settings → Your Android app → google-services.json,"
+            echo "then base64-encode it and add as a repo secret named GOOGLE_SERVICES_JSON_B64:"
+            echo "  base64 -w0 google-services.json | pbcopy   # macOS"
+            echo "  base64 -w0 google-services.json            # Linux"
+            exit 1
+          fi
+          mkdir -p android/app
+          echo "$GOOGLE_SERVICES_JSON_B64" | base64 -d > android/app/google-services.json
+          echo "Wrote android/app/google-services.json ($(wc -c < android/app/google-services.json) bytes)"
+
+      - name: Apply Google Services Gradle plugin
+        run: |
+          # Project-level build.gradle — add classpath
+          if ! grep -q "com.google.gms:google-services" android/build.gradle; then
+            sed -i '/dependencies {/a\        classpath '"'"'com.google.gms:google-services:4.4.2'"'"'' android/build.gradle
+          fi
+          # App-level build.gradle — apply plugin
+          if ! grep -q "com.google.gms.google-services" android/app/build.gradle; then
+            echo "" >> android/app/build.gradle
+            echo "apply plugin: 'com.google.gms.google-services'" >> android/app/build.gradle
+          fi
+          echo "--- android/build.gradle ---"
+          grep -n "google-services" android/build.gradle || true
+          echo "--- android/app/build.gradle (tail) ---"
+          tail -5 android/app/build.gradle
+
       - name: Sync Capacitor → Android
         run: npx --yes cap sync android
 
@@ -59,7 +88,7 @@ jobs:
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: Print debug keystore SHA-1 (register in Google Cloud Console)
+      - name: Print debug keystore SHA-1 (register in Firebase Console)
         run: keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android | grep SHA1 || true
 
       - name: Upload APK artifact
