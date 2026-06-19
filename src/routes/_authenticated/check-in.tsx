@@ -22,7 +22,8 @@ function CheckIn() {
     today().then((d) => {
       if (d?.mood) navigate({ to: "/home", replace: true });
     });
-  }, [today, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const submit = async () => {
     if (!picked) return;
