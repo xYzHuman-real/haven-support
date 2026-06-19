@@ -241,14 +241,11 @@ export const getProfileStats = createServerFn({ method: "GET" })
 export const getCommunityCounts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
-      .from("posts")
-      .select("community")
-      .not("community", "is", null);
+    const { data, error } = await (context.supabase as any).rpc("get_community_counts");
     if (error) throw new Error(error.message);
     const counts: Record<string, number> = {};
     (data ?? []).forEach((r: any) => {
-      counts[r.community] = (counts[r.community] ?? 0) + 1;
+      counts[r.community] = Number(r.count);
     });
     return counts;
   });
