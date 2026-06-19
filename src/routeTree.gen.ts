@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TrustRouteImport } from './routes/trust'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as ExamSelectRouteImport } from './routes/exam-select'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -23,6 +24,11 @@ import { Route as AuthenticatedCheckInRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedCommunitiesIndexRouteImport } from './routes/_authenticated/communities.index'
 import { Route as AuthenticatedCommunitiesSlugRouteImport } from './routes/_authenticated/communities.$slug'
 
+const TrustRoute = TrustRouteImport.update({
+  id: '/trust',
+  path: '/trust',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/exam-select': typeof ExamSelectRoute
   '/onboarding': typeof OnboardingRoute
+  '/trust': typeof TrustRoute
   '/check-in': typeof AuthenticatedCheckInRoute
   '/communities': typeof AuthenticatedCommunitiesRouteWithChildren
   '/create': typeof AuthenticatedCreateRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/exam-select': typeof ExamSelectRoute
   '/onboarding': typeof OnboardingRoute
+  '/trust': typeof TrustRoute
   '/check-in': typeof AuthenticatedCheckInRoute
   '/create': typeof AuthenticatedCreateRoute
   '/encourage': typeof AuthenticatedEncourageRoute
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/exam-select': typeof ExamSelectRoute
   '/onboarding': typeof OnboardingRoute
+  '/trust': typeof TrustRoute
   '/_authenticated/check-in': typeof AuthenticatedCheckInRoute
   '/_authenticated/communities': typeof AuthenticatedCommunitiesRouteWithChildren
   '/_authenticated/create': typeof AuthenticatedCreateRoute
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/exam-select'
     | '/onboarding'
+    | '/trust'
     | '/check-in'
     | '/communities'
     | '/create'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/exam-select'
     | '/onboarding'
+    | '/trust'
     | '/check-in'
     | '/create'
     | '/encourage'
@@ -169,6 +180,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/exam-select'
     | '/onboarding'
+    | '/trust'
     | '/_authenticated/check-in'
     | '/_authenticated/communities'
     | '/_authenticated/create'
@@ -185,10 +197,18 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ExamSelectRoute: typeof ExamSelectRoute
   OnboardingRoute: typeof OnboardingRoute
+  TrustRoute: typeof TrustRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/trust': {
+      id: '/trust'
+      path: '/trust'
+      fullPath: '/trust'
+      preLoaderRoute: typeof TrustRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/onboarding': {
       id: '/onboarding'
       path: '/onboarding'
@@ -326,6 +346,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ExamSelectRoute: ExamSelectRoute,
   OnboardingRoute: OnboardingRoute,
+  TrustRoute: TrustRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

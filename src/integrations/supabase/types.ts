@@ -135,7 +135,35 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_community_counts: {
+        Args: never
+        Returns: {
+          community: string
+          count: number
+        }[]
+      }
+      get_posts_feed: {
+        Args: { _community?: string }
+        Returns: {
+          author_id: string
+          community: string
+          created_at: string
+          goal: string
+          id: string
+          is_anonymous: boolean
+          struggle: string
+          win: string
+        }[]
+      }
+      get_posts_redacted: {
+        Args: { _ids: string[] }
+        Returns: {
+          author_id: string
+          id: string
+          is_anonymous: boolean
+          win: string
+        }[]
+      }
     }
     Enums: {
       encouragement_kind: "understand" | "keep_going" | "not_alone" | "proud"
