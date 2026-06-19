@@ -2,11 +2,6 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 // Native shell ships the SPA bundle from dist/client.
 // (Data calls still hit the live Lovable Cloud backend via the native fetch bridge.)
-const GOOGLE_WEB_CLIENT_ID =
-  process.env.GOOGLE_WEB_CLIENT_ID ||
-  process.env.VITE_GOOGLE_WEB_CLIENT_ID ||
-  '';
-
 const config: CapacitorConfig = {
   appId: 'com.haven.app',
   appName: 'Haven',
@@ -32,12 +27,13 @@ const config: CapacitorConfig = {
       backgroundColor: '#F5F1E8',
       overlaysWebView: false,
     },
-    GoogleAuth: {
-      scopes: ['profile', 'email'],
-      serverClientId: GOOGLE_WEB_CLIENT_ID,
-      forceCodeForRefreshToken: true,
+    FirebaseAuthentication: {
+      // Only Google is used; restricting the providers keeps the native SDKs slim.
+      skipNativeAuth: false,
+      providers: ['google.com'],
     },
   },
 };
 
 export default config;
+
