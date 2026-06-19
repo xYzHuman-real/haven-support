@@ -1,9 +1,9 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
-// Native shell loads the live web app (which is SSR-rendered).
-// Set CAP_SERVER_URL at build time to your published/preview URL,
-// e.g. https://your-app.lovable.app
-const serverUrl = process.env.CAP_SERVER_URL?.trim();
+// Native shell loads the live published web app (which is SSR-rendered).
+// Override with CAP_SERVER_URL at build time if you ever change the URL.
+const DEFAULT_SERVER_URL = 'https://grow-together-haven.lovable.app';
+const serverUrl = (process.env.CAP_SERVER_URL?.trim() || DEFAULT_SERVER_URL);
 
 const config: CapacitorConfig = {
   appId: 'com.haven.app',
