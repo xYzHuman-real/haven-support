@@ -39,7 +39,9 @@ function AuthPage() {
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
-  const hideGoogle = isNativeApp();
+  // Google sign-in uses native Credential Manager on Android (no browser tab)
+  // and Lovable OAuth on web. Always available.
+  const hideGoogle = false;
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
