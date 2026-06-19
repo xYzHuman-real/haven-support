@@ -5,7 +5,6 @@ import { COMMUNITIES } from "@/lib/haven-constants";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/exam-select")({
-  ssr: false,
   component: ExamSelect,
 });
 
