@@ -27,6 +27,11 @@ async function applyPendingExams() {
   }
 }
 
+function isNativeApp() {
+  if (typeof window === "undefined") return false;
+  return (window as any).Capacitor?.isNativePlatform?.() === true;
+}
+
 function AuthPage() {
   const [mode, setMode] = useState<"signin" | "signup">("signup");
   const [email, setEmail] = useState("");
@@ -34,6 +39,7 @@ function AuthPage() {
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
+  const hideGoogle = isNativeApp();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
