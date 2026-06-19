@@ -17,9 +17,9 @@ async function applyPendingExams() {
     const raw = localStorage.getItem(KEY);
     if (!raw) return;
     const exams = JSON.parse(raw) as string[];
-    const { data: u } = await supabase.auth.getUser();
-    if (u.user) {
-      await supabase.from("profiles").update({ exams, onboarded: true }).eq("id", u.user.id);
+    const { data } = await supabase.auth.getSession();
+    if (data.session?.user) {
+      await supabase.from("profiles").update({ exams, onboarded: true }).eq("id", data.session.user.id);
       localStorage.removeItem(KEY);
     }
   } catch {
@@ -37,6 +37,7 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [checkingSession, setCheckingSession] = useState(true);
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
   // Google sign-in uses native Credential Manager on Android (no browser tab)
@@ -44,11 +45,20 @@ function AuthPage() {
   const hideGoogle = false;
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) {
+    let cancelled = false;
+    supabase.auth.getSession().then(({ data }) => {
+      if (cancelled) return;
+      if (data.session?.user) {
         applyPendingExams().then(() => navigate({ to: "/check-in", replace: true }));
+      } else {
+        setCheckingSession(false);
       }
+    }).catch(() => {
+      if (!cancelled) setCheckingSession(false);
     });
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -94,6 +104,16 @@ function AuthPage() {
     navigate({ to: "/check-in" });
     setBusy(false);
   };
+
+  if (checkingSession) {
+    return (
+      <MobileFrame>
+        <div className="flex-1 flex items-center justify-center text-sage-700/60 text-sm">
+          Opening Haven…
+        </div>
+      </MobileFrame>
+    );
+  }
 
   return (
     <MobileFrame>

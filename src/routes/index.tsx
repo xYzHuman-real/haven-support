@@ -12,8 +12,8 @@ function Splash() {
   const navigate = useNavigate();
   useEffect(() => {
     const t = setTimeout(async () => {
-      const { data } = await supabase.auth.getUser();
-      if (data.user) navigate({ to: "/home", replace: true });
+      const { data } = await supabase.auth.getSession();
+      if (data.session?.user) navigate({ to: "/home", replace: true });
       else navigate({ to: "/onboarding", replace: true });
     }, 1400);
     return () => clearTimeout(t);
