@@ -18,7 +18,12 @@ async function applyPendingExams() {
     const { data } = await supabase.auth.getSession();
     const user = data.session?.user;
     if (!user) return;
-    const update: Record<string, unknown> = { onboarded: true };
+    const update: {
+      onboarded: boolean;
+      journey?: string;
+      subcategories?: string[];
+      exams?: string[];
+    } = { onboarded: true };
     const v2raw = localStorage.getItem(PENDING_V2_KEY);
     if (v2raw) {
       const v2 = JSON.parse(v2raw) as { journey?: string | null; subcategories?: string[] };
