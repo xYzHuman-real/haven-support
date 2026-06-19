@@ -11,17 +11,17 @@ const slides = [
   {
     emoji: "🌙",
     title: "Feeling alone in your journey?",
-    body: "Preparing for exams can feel overwhelming. Sometimes it feels like nobody understands what you're going through.",
+    body: "Exams, work, growth — every journey gets heavy. You don't have to walk it alone.",
   },
   {
     emoji: "🤝",
     title: "Share your journey.",
-    body: "Talk about your wins, struggles, and goals with students who understand.",
+    body: "Wins, struggles, goals — share them with people walking similar paths.",
   },
   {
     emoji: "🌱",
     title: "Grow together.",
-    body: "Find encouragement, accountability, and support every day.",
+    body: "Find encouragement, accountability, and quiet support every day.",
   },
 ];
 

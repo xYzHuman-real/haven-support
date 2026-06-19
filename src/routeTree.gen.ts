@@ -20,9 +20,12 @@ import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/h
 import { Route as AuthenticatedEncourageRouteImport } from './routes/_authenticated/encourage'
 import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated/create'
 import { Route as AuthenticatedCommunitiesRouteImport } from './routes/_authenticated/communities'
+import { Route as AuthenticatedCirclesRouteImport } from './routes/_authenticated/circles'
 import { Route as AuthenticatedCheckInRouteImport } from './routes/_authenticated/check-in'
 import { Route as AuthenticatedCommunitiesIndexRouteImport } from './routes/_authenticated/communities.index'
+import { Route as AuthenticatedCirclesIndexRouteImport } from './routes/_authenticated/circles.index'
 import { Route as AuthenticatedCommunitiesSlugRouteImport } from './routes/_authenticated/communities.$slug'
+import { Route as AuthenticatedCirclesSlugRouteImport } from './routes/_authenticated/circles.$slug'
 
 const TrustRoute = TrustRouteImport.update({
   id: '/trust',
@@ -79,6 +82,11 @@ const AuthenticatedCommunitiesRoute =
     path: '/communities',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedCirclesRoute = AuthenticatedCirclesRouteImport.update({
+  id: '/circles',
+  path: '/circles',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCheckInRoute = AuthenticatedCheckInRouteImport.update({
   id: '/check-in',
   path: '/check-in',
@@ -90,11 +98,23 @@ const AuthenticatedCommunitiesIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedCommunitiesRoute,
   } as any)
+const AuthenticatedCirclesIndexRoute =
+  AuthenticatedCirclesIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedCirclesRoute,
+  } as any)
 const AuthenticatedCommunitiesSlugRoute =
   AuthenticatedCommunitiesSlugRouteImport.update({
     id: '/$slug',
     path: '/$slug',
     getParentRoute: () => AuthenticatedCommunitiesRoute,
+  } as any)
+const AuthenticatedCirclesSlugRoute =
+  AuthenticatedCirclesSlugRouteImport.update({
+    id: '/$slug',
+    path: '/$slug',
+    getParentRoute: () => AuthenticatedCirclesRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -104,12 +124,15 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/trust': typeof TrustRoute
   '/check-in': typeof AuthenticatedCheckInRoute
+  '/circles': typeof AuthenticatedCirclesRouteWithChildren
   '/communities': typeof AuthenticatedCommunitiesRouteWithChildren
   '/create': typeof AuthenticatedCreateRoute
   '/encourage': typeof AuthenticatedEncourageRoute
   '/home': typeof AuthenticatedHomeRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/circles/$slug': typeof AuthenticatedCirclesSlugRoute
   '/communities/$slug': typeof AuthenticatedCommunitiesSlugRoute
+  '/circles/': typeof AuthenticatedCirclesIndexRoute
   '/communities/': typeof AuthenticatedCommunitiesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -123,7 +146,9 @@ export interface FileRoutesByTo {
   '/encourage': typeof AuthenticatedEncourageRoute
   '/home': typeof AuthenticatedHomeRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/circles/$slug': typeof AuthenticatedCirclesSlugRoute
   '/communities/$slug': typeof AuthenticatedCommunitiesSlugRoute
+  '/circles': typeof AuthenticatedCirclesIndexRoute
   '/communities': typeof AuthenticatedCommunitiesIndexRoute
 }
 export interface FileRoutesById {
@@ -135,12 +160,15 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/trust': typeof TrustRoute
   '/_authenticated/check-in': typeof AuthenticatedCheckInRoute
+  '/_authenticated/circles': typeof AuthenticatedCirclesRouteWithChildren
   '/_authenticated/communities': typeof AuthenticatedCommunitiesRouteWithChildren
   '/_authenticated/create': typeof AuthenticatedCreateRoute
   '/_authenticated/encourage': typeof AuthenticatedEncourageRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/circles/$slug': typeof AuthenticatedCirclesSlugRoute
   '/_authenticated/communities/$slug': typeof AuthenticatedCommunitiesSlugRoute
+  '/_authenticated/circles/': typeof AuthenticatedCirclesIndexRoute
   '/_authenticated/communities/': typeof AuthenticatedCommunitiesIndexRoute
 }
 export interface FileRouteTypes {
@@ -152,12 +180,15 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/trust'
     | '/check-in'
+    | '/circles'
     | '/communities'
     | '/create'
     | '/encourage'
     | '/home'
     | '/profile'
+    | '/circles/$slug'
     | '/communities/$slug'
+    | '/circles/'
     | '/communities/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -171,7 +202,9 @@ export interface FileRouteTypes {
     | '/encourage'
     | '/home'
     | '/profile'
+    | '/circles/$slug'
     | '/communities/$slug'
+    | '/circles'
     | '/communities'
   id:
     | '__root__'
@@ -182,12 +215,15 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/trust'
     | '/_authenticated/check-in'
+    | '/_authenticated/circles'
     | '/_authenticated/communities'
     | '/_authenticated/create'
     | '/_authenticated/encourage'
     | '/_authenticated/home'
     | '/_authenticated/profile'
+    | '/_authenticated/circles/$slug'
     | '/_authenticated/communities/$slug'
+    | '/_authenticated/circles/'
     | '/_authenticated/communities/'
   fileRoutesById: FileRoutesById
 }
@@ -279,6 +315,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCommunitiesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/circles': {
+      id: '/_authenticated/circles'
+      path: '/circles'
+      fullPath: '/circles'
+      preLoaderRoute: typeof AuthenticatedCirclesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/check-in': {
       id: '/_authenticated/check-in'
       path: '/check-in'
@@ -293,6 +336,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCommunitiesIndexRouteImport
       parentRoute: typeof AuthenticatedCommunitiesRoute
     }
+    '/_authenticated/circles/': {
+      id: '/_authenticated/circles/'
+      path: '/'
+      fullPath: '/circles/'
+      preLoaderRoute: typeof AuthenticatedCirclesIndexRouteImport
+      parentRoute: typeof AuthenticatedCirclesRoute
+    }
     '/_authenticated/communities/$slug': {
       id: '/_authenticated/communities/$slug'
       path: '/$slug'
@@ -300,8 +350,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCommunitiesSlugRouteImport
       parentRoute: typeof AuthenticatedCommunitiesRoute
     }
+    '/_authenticated/circles/$slug': {
+      id: '/_authenticated/circles/$slug'
+      path: '/$slug'
+      fullPath: '/circles/$slug'
+      preLoaderRoute: typeof AuthenticatedCirclesSlugRouteImport
+      parentRoute: typeof AuthenticatedCirclesRoute
+    }
   }
 }
+
+interface AuthenticatedCirclesRouteChildren {
+  AuthenticatedCirclesSlugRoute: typeof AuthenticatedCirclesSlugRoute
+  AuthenticatedCirclesIndexRoute: typeof AuthenticatedCirclesIndexRoute
+}
+
+const AuthenticatedCirclesRouteChildren: AuthenticatedCirclesRouteChildren = {
+  AuthenticatedCirclesSlugRoute: AuthenticatedCirclesSlugRoute,
+  AuthenticatedCirclesIndexRoute: AuthenticatedCirclesIndexRoute,
+}
+
+const AuthenticatedCirclesRouteWithChildren =
+  AuthenticatedCirclesRoute._addFileChildren(AuthenticatedCirclesRouteChildren)
 
 interface AuthenticatedCommunitiesRouteChildren {
   AuthenticatedCommunitiesSlugRoute: typeof AuthenticatedCommunitiesSlugRoute
@@ -321,6 +391,7 @@ const AuthenticatedCommunitiesRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedCheckInRoute: typeof AuthenticatedCheckInRoute
+  AuthenticatedCirclesRoute: typeof AuthenticatedCirclesRouteWithChildren
   AuthenticatedCommunitiesRoute: typeof AuthenticatedCommunitiesRouteWithChildren
   AuthenticatedCreateRoute: typeof AuthenticatedCreateRoute
   AuthenticatedEncourageRoute: typeof AuthenticatedEncourageRoute
@@ -330,6 +401,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCheckInRoute: AuthenticatedCheckInRoute,
+  AuthenticatedCirclesRoute: AuthenticatedCirclesRouteWithChildren,
   AuthenticatedCommunitiesRoute: AuthenticatedCommunitiesRouteWithChildren,
   AuthenticatedCreateRoute: AuthenticatedCreateRoute,
   AuthenticatedEncourageRoute: AuthenticatedEncourageRoute,
