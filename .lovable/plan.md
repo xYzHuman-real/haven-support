@@ -1,74 +1,82 @@
-## Goal
+## Haven V2 — Implementation Plan
 
-Make the Android build feel like a real Play Store app:
-- Stop loading the website over the network. Ship the UI inside the APK.
-- "Continue with Google" opens the native Google account picker, not a browser tab.
-- Fix the Save button on the mood check-in screen.
+Expand Haven from exam-focused to a broader journey-based support platform. Keep V1 features working; layer V2 on top.
 
----
+### 1. Database changes (one migration)
 
-## What needs to change
+- `profiles`: add `journey text` (main category) and keep `exams text[]` but treat it as generic `subcategories` (no schema rename — code-level only) — OR add `subcategories text[]` and stop reading `exams`. Choosing **add `subcategories text[]`** + keep `exams` for backward compat.
+- `mood_checkins`: already has `mood` + `day`. Reuse for mood history; no change.
+- `encouragements`: already exists. Used for streak counts; no change.
+- New table `badges` (catalog) — static, seeded:
+  - `code text pk`, `name text`, `description text`, `emoji text`, `threshold int`, `kind text` (e.g. `encouragements_given`).
+- New table `user_badges`:
+  - `user_id`, `badge_code`, `unlocked_at` — PK (user_id, badge_code).
+- New table `circles` (catalog of support circles):
+  - `slug text pk`, `name text`, `emoji text`, `journey text`, `subcategory text`, `description text`.
+- New table `circle_members`:
+  - `user_id`, `circle_slug`, `joined_at` — PK (user_id, circle_slug).
+- RPCs:
+  - `get_encouragement_stats(_user_id uuid)` → given_total, given_this_week.
+  - `get_mood_history(_user_id uuid, _days int)` → day, mood.
+  - `get_circle_feed(_slug text)` → recent wins/struggles/goals + member count.
+- Add GRANTs + RLS per project rules.
 
-### 1. Bundle the app as a static SPA inside the APK
+### 2. Onboarding redesign
 
-Today Capacitor opens `grow-together-haven.lovable.app` in a WebView, so the app feels like a website and Google sign-in has to redirect through a browser.
+- Replace `exam-select.tsx` flow with two-step journey picker:
+  - Step 1: pick main journey (5 options).
+  - Step 2: pick subcategories (multi-select) from chosen journey.
+- Save `journey` + `subcategories` to `profiles`. Mark `onboarded=true`.
+- Keep `onboarding.tsx` intro; route: intro → journey → subcategories → check-in.
 
-- Remove the remote `server.url` from `capacitor.config.ts`.
-- Add a SPA build mode: a new Vite config + entry that renders TanStack Router on the client only, outputting plain `index.html` + `assets/` to `dist/spa`.
-- All data calls (Supabase, server functions) keep talking to the live Lovable Cloud backend over HTTPS — only the UI ships locally.
-- Point `webDir` to `dist/spa` and update the GitHub Actions workflow to build that target before `cap sync`.
-- Result: instant cold start, no white flash, no browser address bar feel.
+### 3. Support Circles
 
-### 2. Native Google sign-in (no browser redirect)
+- New route `/_authenticated/circles` — list circles filtered by user journey/subcategories, plus "All circles".
+- Replace/augment `communities.$slug.tsx` to a circle screen: members count, recent wins, recent struggles, shared goals, Join/Leave button.
+- Add a "Circles" bottom-nav tab (replace or sit next to Communities).
 
-- Add `@codetrix-studio/capacitor-google-auth`.
-- Detect platform with `Capacitor.isNativePlatform()`. On native, call the plugin's `signIn()`, then hand the returned Google `idToken` to `supabase.auth.signInWithIdToken({ provider: 'google', token })`. On web, keep the current `lovable.auth.signInWithOAuth` flow.
-- Configure the plugin with a Web Client ID in `capacitor.config.ts`.
+### 4. Encouragement streak
 
-**You will need to do this manually (one-time):**
-1. In Google Cloud Console → Credentials, create an **OAuth 2.0 Client ID of type "Web application"** (or reuse the one Lovable Cloud uses for Google sign-in). Copy the client ID.
-2. Create another OAuth client of type **Android**, give it package name `com.haven.app`, and paste the SHA-1 fingerprint of the keystore the GitHub Action signs with. (If the workflow currently builds a debug APK, the debug keystore SHA-1 works for testing; for Play Store you'll generate a release keystore.)
-3. Add the Web Client ID as a build secret called `GOOGLE_WEB_CLIENT_ID` in GitHub repo settings, and as `VITE_GOOGLE_WEB_CLIENT_ID` in Lovable so dev preview works.
+- On profile screen and home header: show "❤️ You encouraged N people this week" using new RPC.
+- No like counts. Pure outgoing kindness.
 
-I'll wire the code, but I can't generate the SHA-1 or register it in Google Cloud for you.
+### 5. Mood history
 
-### 3. Fix the Save button on the check-in screen
+- New section on profile (or `/check-in` history view): weekly + monthly chart using `recharts` (already common). Show emoji legend.
+- Expand mood enum if needed: V1 has moods; ensure `great/good/okay/struggling/exhausted` all valid. Check current enum and extend via migration if missing.
 
-The Save button on "How are you feeling today?" calls a protected server function that needs the user's auth token. Two things can make it silently fail right after sign-up:
+### 6. Helper badges
 
-- The Supabase session isn't fully written to storage before the navigation to `/check-in` fires, so the server function call goes out without a bearer token and returns 401.
-- The error handler only shows a toast and unsticks the button, but the toast can be missed.
+- Seed 4 starter badges in migration.
+- After each encouragement insert, client checks count and unlocks badges (simple client-side or RPC `check_and_award_badges`).
+- Display on profile.
 
-Fix:
-- After `signUp` / `signInWithPassword` and after Google sign-in, await `supabase.auth.getSession()` (and retry briefly if null) before navigating.
-- In `check-in.tsx`, surface the real error message in the toast so failures aren't invisible, and re-enable the button on error (already done) — add a small "Sign in again" fallback if a 401 comes back.
+### 7. UI polish
 
-### 4. Native polish (so it doesn't look like a webview)
+- Add fade-in/scale transitions on route changes.
+- Improve empty states for feed, circles, mood history.
+- Improve loading skeletons.
+- Refine dark mode tokens in `styles.css`.
 
-- Status bar plugin: set background to `#F5F1E8` and dark icons to match the cream theme.
-- Keep the existing splash screen config; preload the first paint behind the splash so there's no white flash.
-- Disable iOS-style overscroll/bounce and text selection on long-press.
-- Lock orientation to portrait (matches the MobileFrame design).
+### Technical notes
 
----
+- Migration runs first (separate approval step).
+- Then code changes: new routes, updated onboarding, profile additions, circles screens, charts.
+- Keep V1 routes working — exam selection becomes a special case of the journey flow (`journey='exams'`).
 
-## Files I'll touch
+### Out of scope (per request)
 
-- `capacitor.config.ts` — drop remote URL, point `webDir: 'dist/spa'`, add GoogleAuth + StatusBar plugin config.
-- `vite.spa.config.ts` (new) — SPA build target.
-- `src/spa-entry.tsx` (new) — client-only router bootstrap.
-- `package.json` — add `build:spa` script, install `@codetrix-studio/capacitor-google-auth`, `@capacitor/status-bar`.
-- `src/lib/native-auth.ts` (new) — platform-aware Google sign-in helper.
-- `src/routes/auth.tsx` — call the new helper, wait for session before navigating.
-- `src/routes/_authenticated/check-in.tsx` — better error surfacing on Save.
-- `.github/workflows/android.yml` — run `bun run build:spa` before `cap sync`, inject `GOOGLE_WEB_CLIENT_ID`.
+DMs, calls, followers, likes, reels, stories, AI journaling, accountability partners.
 
----
+### Files to create/edit (high level)
 
-## What you'll do after I'm done
+- `supabase/migrations/<new>.sql`
+- `src/routes/onboarding.tsx` — rewrite as 2-step journey picker
+- delete or repurpose `src/routes/exam-select.tsx`
+- `src/lib/journeys.ts` — journey + subcategory catalog
+- `src/routes/_authenticated/circles.tsx` + `.index.tsx` + `.$slug.tsx`
+- `src/routes/_authenticated/profile.tsx` — add streak, badges, mood history
+- `src/components/MoodChart.tsx`, `StreakCard.tsx`, `BadgeGrid.tsx`
+- `src/styles.css` — empty/loading polish
 
-1. Add the two GitHub secrets (`GOOGLE_WEB_CLIENT_ID`, and later your release keystore).
-2. Register the Android OAuth client in Google Cloud with your APK's SHA-1.
-3. Re-run the **Build Android APK** workflow and install the new APK.
-
-Hit approve and I'll build it. Reject if you'd rather try the lighter "keep remote URL, just polish chrome" path instead — that's faster but Google sign-in will still flash a browser tab.
+Approve and I'll start with the migration.

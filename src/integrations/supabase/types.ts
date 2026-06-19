@@ -14,6 +14,92 @@ export type Database = {
   }
   public: {
     Tables: {
+      badges: {
+        Row: {
+          code: string
+          created_at: string
+          description: string
+          emoji: string
+          kind: string
+          name: string
+          threshold: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description: string
+          emoji: string
+          kind: string
+          name: string
+          threshold?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string
+          emoji?: string
+          kind?: string
+          name?: string
+          threshold?: number
+        }
+        Relationships: []
+      }
+      circle_members: {
+        Row: {
+          circle_slug: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          circle_slug: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          circle_slug?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "circle_members_circle_slug_fkey"
+            columns: ["circle_slug"]
+            isOneToOne: false
+            referencedRelation: "circles"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
+      circles: {
+        Row: {
+          created_at: string
+          description: string
+          emoji: string
+          journey: string
+          name: string
+          slug: string
+          subcategory: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          emoji: string
+          journey: string
+          name: string
+          slug: string
+          subcategory?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          emoji?: string
+          journey?: string
+          name?: string
+          slug?: string
+          subcategory?: string | null
+        }
+        Relationships: []
+      }
       encouragements: {
         Row: {
           created_at: string
@@ -109,7 +195,9 @@ export type Database = {
           display_name: string
           exams: string[]
           id: string
+          journey: string | null
           onboarded: boolean
+          subcategories: string[]
           updated_at: string
         }
         Insert: {
@@ -117,7 +205,9 @@ export type Database = {
           display_name?: string
           exams?: string[]
           id: string
+          journey?: string | null
           onboarded?: boolean
+          subcategories?: string[]
           updated_at?: string
         }
         Update: {
@@ -125,21 +215,75 @@ export type Database = {
           display_name?: string
           exams?: string[]
           id?: string
+          journey?: string | null
           onboarded?: boolean
+          subcategories?: string[]
           updated_at?: string
         }
         Relationships: []
+      }
+      user_badges: {
+        Row: {
+          badge_code: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          badge_code: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          badge_code?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_code_fkey"
+            columns: ["badge_code"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["code"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      get_circle_feed: {
+        Args: { _slug: string }
+        Returns: {
+          author_id: string
+          created_at: string
+          goal: string
+          id: string
+          is_anonymous: boolean
+          struggle: string
+          win: string
+        }[]
+      }
       get_community_counts: {
         Args: never
         Returns: {
           community: string
           count: number
+        }[]
+      }
+      get_encouragement_stats: {
+        Args: { _user_id: string }
+        Returns: {
+          given_this_week: number
+          given_total: number
+        }[]
+      }
+      get_mood_history: {
+        Args: { _days?: number; _user_id: string }
+        Returns: {
+          day: string
+          mood: string
         }[]
       }
       get_posts_feed: {
