@@ -173,13 +173,28 @@ export const getEncouragementsToday = createServerFn({ method: "GET" })
     since.setHours(0, 0, 0, 0);
     const { data, error } = await context.supabase
       .from("encouragements")
-      .select("id, kind, created_at, post_id, posts(author_id, win, is_anonymous)")
+      .select("id, kind, created_at, post_id")
       .eq("giver_id", context.userId)
       .gte("created_at", since.toISOString())
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    const unique = new Set((data ?? []).map((d: any) => d.posts?.author_id).filter(Boolean));
-    return { count: data?.length ?? 0, students: unique.size, items: data ?? [] };
+    const rows = data ?? [];
+    const postIds = Array.from(new Set(rows.map((d: any) => d.post_id)));
+    let postsMap = new Map<string, any>();
+    if (postIds.length) {
+      const { data: posts } = await (context.supabase as any).rpc("get_posts_redacted", {
+        _ids: postIds,
+      });
+      postsMap = new Map((posts ?? []).map((p: any) => [p.id, p]));
+    }
+    const items = rows.map((r: any) => ({
+      ...r,
+      posts: postsMap.get(r.post_id) ?? null,
+    }));
+    const unique = new Set(
+      items.map((d: any) => d.posts?.author_id).filter(Boolean),
+    );
+    return { count: rows.length, students: unique.size, items };
   });
 
 export const getProfileStats = createServerFn({ method: "GET" })
