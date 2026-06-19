@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { MobileFrame } from "@/components/MobileFrame";
 
 export const Route = createFileRoute("/")({
-  ssr: false,
   component: Splash,
 });
 
