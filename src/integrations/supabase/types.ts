@@ -44,6 +44,13 @@ export type Database = {
             referencedRelation: "posts"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "encouragements_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts_feed"
+            referencedColumns: ["id"]
+          },
         ]
       }
       mood_checkins: {
@@ -132,7 +139,39 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      posts_feed: {
+        Row: {
+          author_id: string | null
+          community: string | null
+          created_at: string | null
+          goal: string | null
+          id: string | null
+          is_anonymous: boolean | null
+          struggle: string | null
+          win: string | null
+        }
+        Insert: {
+          author_id?: never
+          community?: string | null
+          created_at?: string | null
+          goal?: string | null
+          id?: string | null
+          is_anonymous?: boolean | null
+          struggle?: string | null
+          win?: string | null
+        }
+        Update: {
+          author_id?: never
+          community?: string | null
+          created_at?: string | null
+          goal?: string | null
+          id?: string | null
+          is_anonymous?: boolean | null
+          struggle?: string | null
+          win?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
