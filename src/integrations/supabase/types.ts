@@ -44,13 +44,6 @@ export type Database = {
             referencedRelation: "posts"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "encouragements_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "posts_feed"
-            referencedColumns: ["id"]
-          },
         ]
       }
       mood_checkins: {
@@ -139,42 +132,38 @@ export type Database = {
       }
     }
     Views: {
-      posts_feed: {
-        Row: {
-          author_id: string | null
-          community: string | null
-          created_at: string | null
-          goal: string | null
-          id: string | null
-          is_anonymous: boolean | null
-          struggle: string | null
-          win: string | null
-        }
-        Insert: {
-          author_id?: never
-          community?: string | null
-          created_at?: string | null
-          goal?: string | null
-          id?: string | null
-          is_anonymous?: boolean | null
-          struggle?: string | null
-          win?: string | null
-        }
-        Update: {
-          author_id?: never
-          community?: string | null
-          created_at?: string | null
-          goal?: string | null
-          id?: string | null
-          is_anonymous?: boolean | null
-          struggle?: string | null
-          win?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_community_counts: {
+        Args: never
+        Returns: {
+          community: string
+          count: number
+        }[]
+      }
+      get_posts_feed: {
+        Args: { _community?: string }
+        Returns: {
+          author_id: string
+          community: string
+          created_at: string
+          goal: string
+          id: string
+          is_anonymous: boolean
+          struggle: string
+          win: string
+        }[]
+      }
+      get_posts_redacted: {
+        Args: { _ids: string[] }
+        Returns: {
+          author_id: string
+          id: string
+          is_anonymous: boolean
+          win: string
+        }[]
+      }
     }
     Enums: {
       encouragement_kind: "understand" | "keep_going" | "not_alone" | "proud"
