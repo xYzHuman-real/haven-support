@@ -6,7 +6,8 @@ on:
   workflow_dispatch:
 
 env:
-  # The Android shell loads the published Lovable URL directly (see capacitor.config.ts).
+  # The React SPA is bundled into the APK at build time (see scripts/build-capacitor.js).
+  # Data calls are routed to this remote backend by src/lib/native-fetch-bridge.ts.
   VITE_REMOTE_API_BASE: https://grow-together-haven.lovable.app
   VITE_SUPABASE_URL: https://nmxcuxhckhcajcvdoeeu.supabase.co
   VITE_SUPABASE_PROJECT_ID: nmxcuxhckhcajcvdoeeu
