@@ -1,24 +1,14 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
-// The Android shell loads the live deployed Lovable app directly.
-// This avoids shipping the SPA bundle (TanStack Start's SSR pipeline isn't
-// straightforward to repackage as a static SPA shell) and ensures the app
-// always runs the latest published code without rebuilding the APK.
-//
-// `dist/client` still exists from the regular `vite build` and is used as the
-// offline fallback bundle Capacitor needs at packaging time, but at runtime
-// the WebView navigates to `server.url` below.
-const REMOTE_APP_URL = 'https://grow-together-haven.lovable.app';
-
+// The Android shell ships the React SPA bundled inside the APK (dist/client),
+// so screens load instantly from the device and the app works without an
+// internet round-trip for UI. Only data calls (Supabase, server functions)
+// hit the network — those are routed to the published Lovable backend by
+// src/lib/native-fetch-bridge.ts.
 const config: CapacitorConfig = {
   appId: 'com.haven.app',
   appName: 'Haven',
   webDir: 'dist/client',
-  server: {
-    url: REMOTE_APP_URL,
-    androidScheme: 'https',
-    cleartext: false,
-  },
   android: {
     allowMixedContent: false,
   },
@@ -38,7 +28,6 @@ const config: CapacitorConfig = {
       overlaysWebView: false,
     },
     FirebaseAuthentication: {
-      // Only Google is used; restricting the providers keeps the native SDKs slim.
       skipNativeAuth: false,
       providers: ['google.com'],
     },
